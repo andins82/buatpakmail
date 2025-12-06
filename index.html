@@ -181,21 +181,30 @@ button{
 
 .kapi{
     position:absolute;
-    font-size:22px;
+    font-size:22px; /* Ukuran Kapibara */
     cursor:pointer;
     padding: 5px;
-    transition: transform 1s ease-in-out; /* Untuk efek pergerakan halus */
+    transition: transform 1.5s ease-in-out; /* Untuk efek pergerakan halus */
+    /* Membuat Kapibara tidak terpotong saat di sudut */
+    transform-origin: top left;
 }
 
 /* Teks pujian yang bergerak bebas */
 .kapi.text{
-    font-size: 8px;
+    font-size: 10px; /* Sedikit lebih besar agar lebih terbaca */
     color: white;
     background: #333;
     border-radius: 5px;
     padding: 5px;
     white-space: nowrap;
     cursor: default;
+    
+    /* --- PERBAIKAN UTAMA AGAR TULISAN TIDAK TERPOTONG --- */
+    width: max-content; 
+    height: auto;
+    
+    /* Hentikan transisi pada teks */
+    transition: none; 
 }
 
 #gameMenu{
@@ -238,9 +247,9 @@ button{
         <p>Nama : Pak Mail</p>
         <p>Alamat : Banyumas Solo</p>
         <p>Agama : Islam sejati</p>
-        <p>Pekerjaan : Guru ekonomi paling keren, ketce badai</p>
+        <p>Pekerjaan : Guru ekonomi paling keren</p>
         <p>Kewarganegaraan : Solopride</p>
-        <p>Hobi : Masak bakwan jagung, fotografi, buanyak pokoknya</p>
+        <p>Hobi : masak Bakwan jagung, fotografi, dll</p>
     </div>
 </div>
 
@@ -282,7 +291,8 @@ const gameBox = document.getElementById("gameBox")
 const gameMenu = document.getElementById("gameMenu")
 const resetBtn = document.getElementById("resetBtn")
 
-let gameIntervals = []; // Array untuk menyimpan semua interval pergerakan
+let gameIntervals = []; 
+let kapiElements = []; // Menyimpan semua elemen Kapibara/Teks
 
 function goMenu(){
     startPage.classList.remove("active")
@@ -329,6 +339,7 @@ function showGame(){
     resetBtn.style.display = 'none';
     gameBox.innerHTML = ""; // Kosongkan kotak
     clearGameIntervals();
+    kapiElements = []; // Kosongkan array elemen
 }
 
 function closeAll(){
@@ -347,17 +358,19 @@ function clearGameIntervals(){
     gameIntervals = [];
 }
 
-function generateRandomPosition(element, boxWidth, boxHeight) {
-    const elementWidth = element.offsetWidth;
-    const elementHeight = element.offsetHeight;
+function generateRandomPosition(element, boxWidth, boxHeight, isText) {
+    // Ukur elemen saat ini (penting untuk elemen teks)
+    const elementWidth = isText ? element.offsetWidth : 35; // Perkiraan ukuran emoji Kapibara
+    const elementHeight = isText ? element.offsetHeight : 35; 
     
-    // Pastikan Kapibara tetap di dalam batas box
+    // Pastikan elemen tetap di dalam batas box
     const maxLeft = boxWidth - elementWidth;
     const maxTop = boxHeight - elementHeight;
     
-    const newLeft = Math.random() * maxLeft;
-    const newTop = Math.random() * maxTop;
-    const rotation = Math.random() * 360; // Rotasi acak
+    // Jika maxLeft/maxTop negatif (elemen lebih besar dari box), gunakan 0
+    const newLeft = Math.random() * Math.max(0, maxLeft);
+    const newTop = Math.random() * Math.max(0, maxTop);
+    const rotation = isText ? 0 : Math.random() * 360; // Teks tidak perlu rotasi
 
     element.style.transform = `translate(${newLeft}px, ${newTop}px) rotate(${rotation}deg)`;
 }
@@ -365,57 +378,64 @@ function generateRandomPosition(element, boxWidth, boxHeight) {
 function mulaiGame(){
     gameBox.innerHTML = ""
     clearGameIntervals(); // Hentikan interval lama jika ada
+    kapiElements = [];
     gameMenu.style.display="none" // Sembunyikan menu/tombol mulai
     resetBtn.style.display="none"
     gameBox.style.display = 'block'; // Tampilkan area game
 
     const texts = [
-        "Semangat terus pak",
-        "Sehat terus pak",
-        "Pak Mail pancene top",
-        "keren pol pak",
-        "Bahagia selalu pak",
-        "pokok e top markotop",
-        "matur nuwun bapakk",
+        "Semangat Pak Mail",
+        "Sehat selalu",
+        "Pak Mail keren",
+        "Tutor jago",
+        "Bahagia",
+        "Kapibara sehat",
+        "Terima kasih",
         "Super hero",
-        "mauu bakwan jagungnya",
-        "ayu ke pekalongan pak"
+        "Inspiratif",
+        "Legend"
     ]
-    const capybaraEmoji = "🦦" // Kapibara/Otter yang digunakan sebelumnya
+    const capybaraEmoji = "🦦" 
     
     let changed = 0
-    const boxWidth = gameBox.clientWidth;
+    // Ambil dimensi Game Box setelah di set display:block
+    const boxWidth = gameBox.clientWidth; 
     const boxHeight = gameBox.clientHeight;
     
-    // Array untuk menyimpan elemen kapi
-    const kapiElements = [];
 
     for(let i=0; i<10; i++){
         let k = document.createElement("div")
         k.className="kapi"
         k.innerText=capybaraEmoji
-        k.style.left = "0px"; // Reset posisi awal
+        k.style.left = "0px"; 
         k.style.top = "0px";
-        k.isText = false; // Flag untuk status
+        k.isText = false; 
 
-        // Posisi dan rotasi awal
-        generateRandomPosition(k, boxWidth, boxHeight); 
+        // Posisi dan rotasi awal Kapibara
+        generateRandomPosition(k, boxWidth, boxHeight, k.isText); 
         kapiElements.push(k);
         
         // Interval pergerakan untuk setiap Kapibara
         const intervalId = setInterval(()=>{
-            if(!k.isText) { // Hanya Kapibara yang bergerak
-                generateRandomPosition(k, boxWidth, boxHeight);
-            }
+            // Kapibara dan Teks bergerak, tetapi Teks tidak berotasi
+            generateRandomPosition(k, boxWidth, boxHeight, k.isText);
         }, 1500 + Math.random() * 500); // Gerak setiap 1.5 - 2 detik
         gameIntervals.push(intervalId);
 
         k.onclick = function() {
-            if (this.innerText === capybaraEmoji) {
+            if (!this.isText) { // Cek apakah elemen ini masih Kapibara
+                
+                // Ganti menjadi teks
                 this.innerText = texts[i]
                 this.isText = true;
-                this.classList.add('text'); // Terapkan style teks
-                this.style.transform = this.style.transform.replace(/rotate\((.*?)\)/, 'rotate(0deg)'); // Hapus rotasi
+                this.classList.add('text'); 
+                
+                // HARUS DIPOSISIKAN ULANG setelah menjadi teks karena ukurannya berubah!
+                // Perlu sedikit delay agar browser sempat menghitung ukuran teks
+                setTimeout(() => {
+                    generateRandomPosition(this, boxWidth, boxHeight, this.isText);
+                }, 50);
+
                 this.style.cursor = 'default';
                 yummy.currentTime=0
                 yummy.play()
@@ -436,4 +456,3 @@ function mulaiGame(){
 </script>
 </body>
 </html>
-
