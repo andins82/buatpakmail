@@ -13,7 +13,7 @@
 body {
     margin:0;
     font-family: 'Press Start 2P', cursive;
-    background: #87CEEB;
+    background: #87CEEB; /* Langit */
     overflow:hidden;
 }
 
@@ -85,6 +85,7 @@ button{
     font-family:inherit;
     cursor:pointer;
     border:3px solid black;
+    background: #FFD700; /* Warna retro */
 }
 
 /* === MENU === */
@@ -157,21 +158,48 @@ button{
 }
 
 /* === GAME === */
+#gameContent{
+    text-align:center;
+    background:white; /* Background kontainer game */
+    padding: 20px;
+    border: 5px solid black;
+    max-width: 420px;
+    width: 90%;
+    position: relative;
+}
+
 #gameBox{
-    width:90%;
-    max-width:380px;
-    height:300px;
-    border:5px solid black;
-    background:white;
+    width: 100%;
+    height: 300px;
+    border: 5px solid #4CAF50; /* Border rumput */
+    background: #8BC34A; /* Background rumput */
     position:relative;
     overflow:hidden;
     margin-top:10px;
+    display: none; /* Sembunyikan saat belum mulai */
 }
 
 .kapi{
     position:absolute;
     font-size:22px;
     cursor:pointer;
+    padding: 5px;
+    transition: transform 1s ease-in-out; /* Untuk efek pergerakan halus */
+}
+
+/* Teks pujian yang bergerak bebas */
+.kapi.text{
+    font-size: 8px;
+    color: white;
+    background: #333;
+    border-radius: 5px;
+    padding: 5px;
+    white-space: nowrap;
+    cursor: default;
+}
+
+#gameMenu{
+    margin-top: 10px;
 }
 </style>
 </head>
@@ -191,20 +219,17 @@ button{
 <div class="flower" style="left:30%">🌼</div>
 <div class="flower" style="left:70%">🌻</div>
 
-<!-- START -->
 <div id="startPage" class="page active">
     <h1>SELAMAT HARI GURU<br>PAK MAIL</h1>
     <button onclick="goMenu()">START</button>
 </div>
 
-<!-- MENU -->
 <div id="menuPage" class="page">
     <div class="menu-btn" onclick="showKtp()">🎫</div>
     <div class="menu-btn" onclick="showLetter()">✉️</div>
     <div class="menu-btn" onclick="showGame()">🎮</div>
 </div>
 
-<!-- KTP -->
 <div id="ktp" class="overlay">
     <div class="ktp">
         <div class="close" onclick="closeAll()">❌</div>
@@ -213,13 +238,12 @@ button{
         <p>Nama : Pak Mail</p>
         <p>Alamat : Banyumas Solo</p>
         <p>Agama : Islam sejati</p>
-        <p>Pekerjaan : Guru ekonomi paling keren</p>
+        <p>Pekerjaan : Guru ekonomi paling keren, ketce badai</p>
         <p>Kewarganegaraan : Solopride</p>
-        <p>Hobi : masak Bakwan jagung, fotografi, dll</p>
+        <p>Hobi : Masak bakwan jagung, fotografi, buanyak pokoknya</p>
     </div>
 </div>
 
-<!-- SURAT -->
 <div id="surat" class="overlay">
     <div class="letter">
         <div class="close" onclick="closeAll()">❌</div>
@@ -227,15 +251,17 @@ button{
     </div>
 </div>
 
-<!-- GAME -->
 <div id="game" class="overlay">
-    <div style="text-align:center;">
+    <div id="gameContent">
         <div class="close" onclick="closeAll()">❌</div>
 
-        <button onclick="mulaiGame()">MULAI</button>
-        <p>Tangkap Kapibaranya!</p>
+        <div id="gameMenu">
+            <button onclick="mulaiGame()">MULAI</button>
+            <p>Tangkap Kapibaranya!</p>
+        </div>
 
-        <div id="gameBox"></div>
+        <div id="gameBox">
+            </div>
 
         <div id="resetBtn" style="display:none">
             <button onclick="mulaiGame()">MULAI ULANG</button>
@@ -253,7 +279,10 @@ const surat = document.getElementById("surat")
 const game = document.getElementById("game")
 const typedText = document.getElementById("typedText")
 const gameBox = document.getElementById("gameBox")
+const gameMenu = document.getElementById("gameMenu")
 const resetBtn = document.getElementById("resetBtn")
+
+let gameIntervals = []; // Array untuk menyimpan semua interval pergerakan
 
 function goMenu(){
     startPage.classList.remove("active")
@@ -262,27 +291,26 @@ function goMenu(){
     bgm.play()
 }
 
-/* === MENU === */
+/* === MENU & OVERLAY CONTROLS === */
 function showKtp(){ ktp.classList.add("active") }
 
 function showLetter(){
     surat.classList.add("active")
     typedText.innerHTML = ""
-
-    const txt = `Selamat hari guru pak Ismail 
+    const txt = `Selamat hari guru pak Ismail 
     Terima kasih untukk semuaanyaa.
-    Dari mulai jadi guru ekonomi di kelas sepuluh Hazen yang super seru yang bikin saya jadii suka ekonomi, 
-    bahkan ngerasa ekonomi itu sangat menyenangkan, terus jadi Pembina lomba debat yang super keren dan sabaaar, dilanjut jadi Pembina Transnetion dan Dewan ambalan yang juga super sabar dan telaten, 
-    bahkan sampai jadi konselor ketika saya galau hehehe. 
-    Terima kasihh banyak-banyak pokoknya buat waktu, perasaan, tenaga, fikiran, ilmu, nasihat, pokoknyaa semuanyaa pak. 
-    Makasi uda jadi pendengar yang sangat baik untuk saya pak, bahkan kadang ngasih nasihatt dan masukan buat sayaa, 
-    huhuhu saya juga minta maaf yang sebesar-besarnya pak untuk semua kesalahan yang pernah saya lakukan baik disengaja ataupun tidak bapak, 
-    mungkin ada perkataan/ketikan/perbuatan saya yang kurang pas atau bahkan tidak mengenakkan pak. 
-    Doain ya pak semoga saya bisa sehebat dan sekeren pak mail, semoga saya bisa setidaknya berguna dan bermanfaat bagi orang lain pak… 
-    Sehat selalu ya pak, huehehe keren tau bapak mah, olahraga tiap hari, makan masak sendiri, real healty life itu mah pak… 
-    pokoknya Bahagia dan sehat selalu, dikasih rezeki yang berlimpah, halal dan berkah, dimudahkan juga dalam mencari (jodoh) rezekinya pak, 
-    selalu dikelilingi sama orang-orang baik dan pokoknya selalu diberikan yang terbaik untuk pak Mail Aammiinn… 
-    Nanti kalau saya udah lulus jangan lupain selasa manis ya pak. 
+    Dari mulai jadi guru ekonomi di kelas sepuluh Hazen yang super seru yang bikin saya jadii suka ekonomi, 
+    bahkan ngerasa ekonomi itu sangat menyenangkan, terus jadi Pembina lomba debat yang super keren dan sabaaar, dilanjut jadi Pembina Transnetion dan Dewan ambalan yang juga super sabar dan telaten, 
+    bahkan sampai jadi konselor ketika saya galau hehehe. 
+    Terima kasihh banyak-banyak pokoknya buat waktu, perasaan, tenaga, fikiran, ilmu, nasihat, pokoknyaa semuanyaa pak. 
+    Makasi uda jadi pendengar yang sangat baik untuk saya pak, bahkan kadang ngasih nasihatt dan masukan buat sayaa, 
+    huhuhu saya juga minta maaf yang sebesar-besarnya pak untuk semua kesalahan yang pernah saya lakukan baik disengaja ataupun tidak bapak, 
+    mungkin ada perkataan/ketikan/perbuatan saya yang kurang pas atau bahkan tidak mengenakkan pak. 
+    Doain ya pak semoga saya bisa sehebat dan sekeren pak mail, semoga saya bisa setidaknya berguna dan bermanfaat bagi orang lain pak… 
+    Sehat selalu ya pak, huehehe keren tau bapak mah, olahraga tiap hari, makan masak sendiri, real healty life itu mah pak… 
+    pokoknya Bahagia dan sehat selalu, dikasih rezeki yang berlimpah, halal dan berkah, dimudahkan juga dalam mencari (jodoh) rezekinya pak, 
+    selalu dikelilingi sama orang-orang baik dan pokoknya selalu diberikan yang terbaik untuk pak Mail Aammiinn… 
+    Nanti kalau saya udah lulus jangan lupain selasa manis ya pak. 
     -Selma`
 
     let i=0
@@ -293,18 +321,53 @@ function showLetter(){
     },40)
 }
 
-function showGame(){ game.classList.add('active') }
+function showGame(){ 
+    game.classList.add('active');
+    // Pastikan game dalam kondisi menu/reset saat dibuka
+    gameBox.style.display = 'none';
+    gameMenu.style.display = 'block';
+    resetBtn.style.display = 'none';
+    gameBox.innerHTML = ""; // Kosongkan kotak
+    clearGameIntervals();
+}
 
 function closeAll(){
     ktp.classList.remove("active")
     surat.classList.remove("active")
+    // Reset Game saat ditutup
+    if(game.classList.contains("active")){
+        clearGameIntervals();
+    }
     game.classList.remove("active")
 }
 
 /* === GAME SYSTEM FIX === */
+function clearGameIntervals(){
+    gameIntervals.forEach(clearInterval);
+    gameIntervals = [];
+}
+
+function generateRandomPosition(element, boxWidth, boxHeight) {
+    const elementWidth = element.offsetWidth;
+    const elementHeight = element.offsetHeight;
+    
+    // Pastikan Kapibara tetap di dalam batas box
+    const maxLeft = boxWidth - elementWidth;
+    const maxTop = boxHeight - elementHeight;
+    
+    const newLeft = Math.random() * maxLeft;
+    const newTop = Math.random() * maxTop;
+    const rotation = Math.random() * 360; // Rotasi acak
+
+    element.style.transform = `translate(${newLeft}px, ${newTop}px) rotate(${rotation}deg)`;
+}
+
 function mulaiGame(){
     gameBox.innerHTML = ""
+    clearGameIntervals(); // Hentikan interval lama jika ada
+    gameMenu.style.display="none" // Sembunyikan menu/tombol mulai
     resetBtn.style.display="none"
+    gameBox.style.display = 'block'; // Tampilkan area game
 
     const texts = [
         "Semangat Pak Mail",
@@ -318,40 +381,58 @@ function mulaiGame(){
         "Inspiratif",
         "Legend"
     ]
-
+    const capybaraEmoji = "🦦" // Kapibara/Otter yang digunakan sebelumnya
+    
     let changed = 0
+    const boxWidth = gameBox.clientWidth;
+    const boxHeight = gameBox.clientHeight;
+    
+    // Array untuk menyimpan elemen kapi
+    const kapiElements = [];
 
-    for(let i=0;i<10;i++){
-
+    for(let i=0; i<10; i++){
         let k = document.createElement("div")
         k.className="kapi"
-        k.innerText="🦦"
-        k.style.left = Math.random()*300+"px"
-        k.style.top = Math.random()*250+"px"
+        k.innerText=capybaraEmoji
+        k.style.left = "0px"; // Reset posisi awal
+        k.style.top = "0px";
+        k.isText = false; // Flag untuk status
 
-        k.onclick = ()=>{
-            if(k.innerText==="🦫"){
-                k.innerText = texts[i]
+        // Posisi dan rotasi awal
+        generateRandomPosition(k, boxWidth, boxHeight); 
+        kapiElements.push(k);
+        
+        // Interval pergerakan untuk setiap Kapibara
+        const intervalId = setInterval(()=>{
+            if(!k.isText) { // Hanya Kapibara yang bergerak
+                generateRandomPosition(k, boxWidth, boxHeight);
+            }
+        }, 1500 + Math.random() * 500); // Gerak setiap 1.5 - 2 detik
+        gameIntervals.push(intervalId);
+
+        k.onclick = function() {
+            if (this.innerText === capybaraEmoji) {
+                this.innerText = texts[i]
+                this.isText = true;
+                this.classList.add('text'); // Terapkan style teks
+                this.style.transform = this.style.transform.replace(/rotate\((.*?)\)/, 'rotate(0deg)'); // Hapus rotasi
+                this.style.cursor = 'default';
                 yummy.currentTime=0
                 yummy.play()
                 changed++
 
                 if(changed === 10){
+                    // Hentikan semua pergerakan (Interval)
+                    clearGameIntervals(); 
+                    
+                    // Tampilkan tombol reset setelah semua berubah
                     resetBtn.style.display="block"
                 }
             }
         }
-
-        setInterval(()=>{
-            k.style.left = Math.random()*320+"px"
-            k.style.top = Math.random()*260+"px"
-        },2000)
-
         gameBox.appendChild(k)
     }
 }
 </script>
 </body>
 </html>
-
-
